@@ -53,15 +53,19 @@ def process_video_file(filename):
     logging.info('%s -> %s', filename, target_filename)  
 
     if target_filename.exists():
-        logging.info('Target already exists %s, bailing out', target_filename)  
+        logging.info('target already exists %s, bailing out', target_filename)  
         return
 
-    logging.info('Before the copying of %s -> %s', filename, target_filename)
+    if DEBUG:
+        logging.info('NOT copying %s -> %s, debug, bailing out',
+                         filename, target_filename)
+        return
 
-    if not DEBUG: 
-        target_filename.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(filename, target_filename)
-        filename.unlink(missing_ok=True)
+    logging.info('before the copying of %s -> %s', filename, target_filename)
+
+    target_filename.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(filename, target_filename)
+    filename.unlink(missing_ok=True)
         
     logging.info('%s complete and %s unlinked', target_filename, filename)  
 
