@@ -1,5 +1,11 @@
-import time, os, re
-from pathlib import Path
+import sys, time, os, re
+# no pathlib means no python3 i guess.
+try:
+    from pathlib import Path
+except ImportError:
+    print("Python 3 is required.")
+    sys.exit()
+    
 from shutil import copyfile
 
 ##
@@ -10,12 +16,9 @@ target = home / "Videos"
 ##
 # different sources
 source = home / "Pictures"
-source = Path("D:/")
-source = Path("E:/")
-source = Path("P:/isolde/Eigene Bilder Notebook/")
 
 def get_video_files(p):
-    ext = {'.avi', '.mp4', '.vob', '.mov'                  }
+    ext = {'.avi', '.mp4', '.vob', '.mov'}
     for path in p.rglob(r'*'):
         if path.suffix.lower() in ext:
             yield(path)
@@ -33,11 +36,6 @@ def process_video_file(filename):
     return target_filename
 
 if __name__ == "__main__":
-    ##
-    # Test
-    # p = Path('C:/Users/Isolde/Pictures/.Picasa3Temp_18/Screenshot_20190418-172441_WhatsApp.jpg')
-    # print(process_video_file(p))
-    
     for f in get_video_files(source):
         print(f)
         t = process_video_file(f)
