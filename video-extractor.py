@@ -20,8 +20,10 @@ try:
         target = Path(sys.argv[2])
     except IndexError:
         target = source.parent  / "Videos"
+        logging.warning('target omitted, it is now %s', target)
 except IndexError:
-    raise ValueError('Please provide at least a source-dir')
+    logging.error('please provide at least a source-dir')
+    sys.exit()
 
 if not DEBUG:
     target.mkdir(parents=True, exist_ok=True)
