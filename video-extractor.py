@@ -1,28 +1,33 @@
 import sys, time, os, re, logging, shutil
 
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(levelname)s:%(message)s',)
-
 try:
     from pathlib import Path
 except ImportError:
     logging.error("no pathlib means no python3, but python 3 is required.")
     sys.exit()
 
+DEBUG = True
 
-##
-# always the same target
-home = Path(os.getenv("HOME"))
-target = home / "Videos"
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(levelname)s:%(message)s',)
 
-logging.info("target dir is %s", target)
+if DEBUG:
+    logging.info("debug-mode and not actually doping anything")
+    
+try:
+    source = Path(sys.argv[1])
+    try:
+        target = Path(sys.argv[2])
+    except IndexError:
+        target = source.parent  / "Videos"
+except IndexError:
+    raise ValueError('Please provide at least a source-dir')
 
-##
-# different sources
-source = home / "Pictures"
+if not DEBUG:
+    target.mkdir(parents=True, exist_ok=True)
 
 logging.info("source is %s", source)
+logging.info("target dir is %s", target)
 
 def get_video_files(p):
     ext = {'.avi', '.mp4', '.vob', '.mov'}
@@ -49,10 +54,13 @@ def process_video_file(filename):
         logging.info('Target already exists %s, bailing out', target_filename)  
         return
 
-    logging.info('Before the copying of %s -> %s', filename, target_filename)  
-    target_filename.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(filename, target_filename)
-    filename.unlink(missing_ok=True)
+    logging.info('Before the copying of %s -> %s', filename, target_filename)
+
+    if not DEBUG: 
+        target_filename.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(filename, target_filename)
+        filename.unlink(missing_ok=True)
+        
     logging.info('%s complete and %s unlinked', target_filename, filename)  
 
     return
