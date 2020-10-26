@@ -42,9 +42,12 @@ def get_video_files(p):
         if path.suffix.lower() in ext:
             yield(path)
 
-
-            
-def process_video_file(filename):
+def get_target_filename(source_filename):
+    target_filename = target / source_filename.resolve().relative_to(source)
+    logging.debug('%s -> %s', source_filename, target_filename)
+    return target_filename
+    
+def process_video_file(source_filename):
     """we make a relative path and prepend the target and we do that
 
     because very often the directory-name contains important
@@ -52,28 +55,25 @@ def process_video_file(filename):
     so /source/test-name/video-file.mov becomes
     /target/test-name/video-file.mov
     """
-    
-    target_filename = target / filename.resolve().relative_to(source)
-    
-    logging.info('%s -> %s', filename, target_filename)  
-
+    target_filename = get_target_filename(source_filename)
     if target_filename.exists():
         logging.info('target already exists %s, bailing out', target_filename)  
         return
 
     if DEBUG:
         logging.info('NOT copying %s -> %s, debug, bailing out',
-                         filename, target_filename)
+                         source_filename, target_filename)
         return
 
-    logging.info('before the copying of %s -> %s', filename, target_filename)
-
-    target_filename.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(filename, target_filename)
-    filename.unlink()
-        
-    logging.info('%s complete and %s unlinked', target_filename, filename)  
-
+    logging.info('%s -> %s', source_filename, target_filename)
+    try:
+        source_filename.rename(target_filename)
+        logging.info('renamed')  
+    except:
+        target_filename.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_filename, target_filename)
+        source_filename.unlink()
+        logging.info('copied and unlinked (filesystem boundaries)')  
     return
 
 if __name__ == "__main__":
