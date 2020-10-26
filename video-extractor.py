@@ -1,19 +1,22 @@
 import sys, time, os, re, logging, shutil
-
+##
+# We use pathlib
 try:
     from pathlib import Path
 except ImportError:
     logging.error("no pathlib means no python3, but python 3 is required.")
     sys.exit()
 
-DEBUG = True
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(levelname)s:%(message)s',)
-
+DEBUG = False
 if DEBUG:
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(levelname)s:%(message)s',)
     logging.info("debug-mode and not actually doping anything")
-    
+else:
+    logging.basicConfig(level=logging.INFO,
+                        format='%(levelname)s:%(message)s',)
+##
+# handle args
 try:
     source = Path(sys.argv[1])
     try:
@@ -25,12 +28,14 @@ except IndexError:
     logging.error('please provide at least a source-dir')
     sys.exit()
 
+logging.debug("source is %s", source)
+logging.debug("target dir is %s", target)
+
 if not DEBUG:
     target.mkdir(parents=True, exist_ok=True)
 
-logging.info("source is %s", source)
-logging.info("target dir is %s", target)
 
+    
 def get_video_files(p):
     ext = {'.avi', '.mp4', '.vob', '.mov'}
     for path in p.rglob(r'*'):
@@ -65,7 +70,7 @@ def process_video_file(filename):
 
     target_filename.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(filename, target_filename)
-    filename.unlink(missing_ok=True)
+    filename.unlink()
         
     logging.info('%s complete and %s unlinked', target_filename, filename)  
 
